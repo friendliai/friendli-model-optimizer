@@ -1,0 +1,119 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "friendli-model-optimizer"
+version = "0.1.0"
+authors = [
+  { name = "FriendliAI teams", email = "eng@friendli.ai" },
+]
+requires-python=">=3.8,<=3.13"
+description = "Model Optimizer CLI for Friendli Engine."
+dependencies = [
+  "transformers>=4.43.1",
+  "datasets",
+  "typer",
+  "torch>=2.0.0",
+  "accelerate",
+  "fmo-core==0.1.0",
+]
+keywords = [ "generative-ai", "llm", "quantization" ]
+readme = "README.txt"
+license = { file = "LICENSE.txt" }
+classifiers=[
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "isort",
+  "mypy",
+  "pydocstyle",
+  "pylint",
+  "tox"
+]
+test = [
+  "black",
+  "isort",
+  "mypy",
+  "pydocstyle",
+  "pylint",
+  "tox",
+  "pytest",
+  "pytest-cov",
+  "pytest-xdist",
+  "coverage"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://friendli.ai/"
+Repository = "https://github.com/friendliai/friendli-model-optimizer"
+Documentation = "https://docs.friendli.ai/"
+Issues = "https://github.com/friendliai/friendli-model-optimizer/issues/new/choose"
+
+[project.scripts]
+fmo = "fmo.main:app"
+
+[tool.isort]
+profile = "black"
+append_only = true
+add_imports = ["from __future__ import annotations"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.pydocstyle]
+convention = "google"
+inherit = false
+ignore-decorators = "overload"
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+addopts = "-rf --cov=friendli --cov-report=html --cov-report=xml --cov-config=.coveragerc --junit-xml=test-result.xml"
+
+[tool.pylint."messages control"]
+disable = [
+    "invalid-name",
+    "missing-class-docstring",
+    "too-few-public-methods",
+    "W0511",
+    "E0213",
+    "R0801",
+    "missing-function-docstring",
+    "no-self-argument",
+    "deprecated-method",
+    "unsubscriptable-object",
+    "consider-using-set-comprehension",
+    "redefined-outer-name",
+]
+extension-pkg-whitelist = "pydantic"
+
+[tool.pylint.TYPECHECK]
+generated-members = [
+    "numpy.*" ,
+    "torch.*"
+]
+
+[tool.pylint.design]
+max-args = 7
+max-parents = 15
+
+[tool.pylint.similarities]
+min-similarity-lines = 4
+ignore-signatures = "yes"
+ignore-comments = "yes"
+ignore-docstrings = "yes"
+ignore-imports = "yes"

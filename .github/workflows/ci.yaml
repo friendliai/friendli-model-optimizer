@@ -1,0 +1,70 @@
+# Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+
+name: FMO CI
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.py"
+      - "pyproject.toml"
+      - "tox.ini"
+  pull_request:
+    paths:
+      - "**.py"
+      - "poetry.lock"
+      - "pyproject.toml"
+      - "tox.ini"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Delete unnecessary directories to secure disk capacity.
+      run: |
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf /opt/hostedtoolcache
+    - name: Set up Python ${{ matrix.python-version }}
+      id: setup-python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set virtual env
+      run: |
+        python -m venv env
+    - name: Load cached venv
+      uses: actions/cache@v3
+      id: cache-venv
+      with:
+        path: env
+        key: |
+          pf-${{ steps.setup-python.outputs.python-version }}-venv-${{ hashFiles('pyproject.toml') }}
+    - name: Install dependencies
+      run: |
+        source env/bin/activate
+        pip install --upgrade pip
+        python -m pip install -e ".[dev]"
+      if: steps.cached-venv-dependencies.outputs.cache-hit != 'true'
+    - name: Install tox
+      run: |
+        source env/bin/activate
+        pip install tox
+    - name: Run lint
+      run: |
+        source env/bin/activate
+        tox run -e lint
+    # - name: Run tests
+    #   run: |
+    #     source env/bin/activate
+    #     tox run
