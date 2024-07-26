@@ -12,7 +12,7 @@ from urllib.request import urlopen
 from packaging.version import _BaseVersion
 from packaging.version import parse as parse_version
 
-FMO_PACKAGE_NAME = "fmo"
+FMO_PACKAGE_NAME = "friendli-model-optimizer"
 PYPI_BASE_URL = "https://pypi.org/pypi"
 
 

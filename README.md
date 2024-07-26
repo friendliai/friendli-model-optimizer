@@ -107,9 +107,6 @@ The command line arguments means :
 > [!TIP]
 > If you want to use more advanced quantization options(e.g., calibration dataset), Please checkout our [official documentations](https://docs.friendli.ai/guides/container/running_friendli_container/quantization).
 
-> [!NOTE]
-> You can use a configuration YAML file
-
 ## Example: Run FP8 uantization with Meta-Llama-3-8B-Instruct
 ```bash
 export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3-8B-Instruct"
