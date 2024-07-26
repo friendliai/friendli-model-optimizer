@@ -8,7 +8,9 @@ import os
 from typing import Optional
 
 import datasets  # type: ignore
+import torch
 from fmo_core import NotSupportedError, QuantizationError  # type: ignore
+from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, PreTrainedTokenizer  # type: ignore
 
 
@@ -74,3 +76,60 @@ def get_tokenizer(
         tokenizer.pad_token = tokenizer.eos_token
 
     return tokenizer
+
+
+def get_calib_dataloader(  # pylint: disable=too-many-arguments
+    tokenizer: PreTrainedTokenizer,
+    dataset: datasets.Dataset,
+    lookup_column_name: str,
+    seed: Optional[int] = 42,
+    max_length: Optional[int] = 512,
+    num_samples: Optional[int] = 512,
+    batch_size: Optional[int] = 32,
+) -> DataLoader:
+    """Return Calibration DataLoader."""
+    try:
+        dataset = dataset.shuffle(seed=seed).select(range(num_samples * 2))  # type: ignore
+        encoded_ds_w_special_tokens = tokenizer(
+            dataset[lookup_column_name][:num_samples],
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=max_length,
+            add_special_tokens=True,
+        ).input_ids
+        encoded_ds_wo_special_tokens = tokenizer(
+            dataset[lookup_column_name][num_samples:],
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=max_length,
+            add_special_tokens=False,
+        ).input_ids
+
+        max_length_diff = (
+            encoded_ds_w_special_tokens.shape[-1]
+            - encoded_ds_wo_special_tokens.shape[-1]
+        )
+        if max_length_diff > 0:
+            padded_tokens = torch.full(
+                (encoded_ds_wo_special_tokens.shape[0], max_length_diff),
+                tokenizer.pad_token_id,
+            )
+            encoded_ds_wo_special_tokens = torch.cat(
+                [encoded_ds_wo_special_tokens, padded_tokens], dim=1
+            )
+        assert (
+            encoded_ds_w_special_tokens.shape[-1]
+            == encoded_ds_wo_special_tokens.shape[-1]
+        )
+        encoded_dataset = torch.cat(
+            [encoded_ds_w_special_tokens, encoded_ds_wo_special_tokens], dim=0
+        )
+
+    except KeyError as exc:
+        raise NotSupportedError(
+            f"`{lookup_column_name}` is not valid column name in given dataset."
+        ) from exc
+
+    return DataLoader(encoded_dataset, batch_size=batch_size)  # type: ignore

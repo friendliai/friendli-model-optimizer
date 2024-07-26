@@ -10,7 +10,7 @@ from typing import Optional
 
 import typer
 
-from fmo.utils.dataset import get_tokenizer, safe_load_datasets
+from fmo.utils.dataset import get_calib_dataloader, get_tokenizer, safe_load_datasets
 from fmo.utils.format import secho_error_and_exit
 from fmo.utils.version import get_installed_version
 
@@ -93,9 +93,9 @@ def quantize(
         "--dataset-target-column-name",
         help=("Huggingface dataset column name for gathering sample activations."),
     ),
-    dataset_num_sample: int = typer.Option(
+    dataset_num_samples: int = typer.Option(
         128,
-        "--dataset-num-sample",
+        "--dataset-num-samples",
         help=("The number of samples for gathering sample activations."),
     ),
     dataset_max_length: int = typer.Option(
@@ -119,7 +119,7 @@ def quantize(
 ):
     """Quantize huggingface's model."""
     # pylint: disable=too-many-locals, import-outside-toplevel
-    from fmo_core import get_calib_dataloader, quantize  # type: ignore
+    from fmo_core import quantize  # type: ignore
 
     # pylint: enable=import-outside-toplevel
 
@@ -135,11 +135,10 @@ def quantize(
         model_name_or_path=model_name_or_path, cache_dir=cache_dir
     )
     calib_dataloader = get_calib_dataloader(
-        mode=mode,
         dataset=dataset,
         lookup_column_name=dataset_target_column_name,
         max_length=dataset_max_length,
-        num_sample=dataset_num_sample,
+        num_samples=dataset_num_samples,
         batch_size=dataset_batch_size,
         seed=seed,
         tokenizer=tokenizer,

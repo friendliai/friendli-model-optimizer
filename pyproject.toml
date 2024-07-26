@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "friendli-model-optimizer"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   { name = "FriendliAI teams", email = "eng@friendli.ai" },
 ]

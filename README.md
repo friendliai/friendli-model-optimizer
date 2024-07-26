@@ -2,7 +2,7 @@
 Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
 -->
 
-<h2><p align="center">Friendli Model Optimizer (FMO) for Supercharge Generative AI Serving 🚀</p></h2>
+<h2><p align="center">Friendli Model Optimizer (FMO) for supercharging generative AI serving 🚀</p></h2>
 
 <p align="center">
   <a href="https://github.com/friendliai/friendli-model-optimizer/actions/workflows/ci.yaml">
@@ -24,20 +24,20 @@ Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
 
 
 # Overview
-FMO is a tool that provides model optimizations for efficient generative AI serving with [Friendli Engine](https://friendli.ai/solutions/engine/).
-It provides features to improve generative AI serving performance without compromising task accuracy.
+Friendli Model Optimizer (FMO) is a tool that provides model optimizations for efficient generative AI serving with [Friendli Engine](https://friendli.ai/solutions/engine/).
+The optimizations improve generative AI serving performance without compromising task accuracy.
 
-FMO is designed to work with Huggingface pretrained model, which can be loaded using ['PreTrainedModel.from_pretrained()'](https://huggingface.co/docs/transformers/en/main_classes/model#transformers.PreTrainedModel.from_pretrained).
+FMO is designed to work with Hugging Face pretrained models, which can be loaded using ['PreTrainedModel.from_pretrained()'](https://huggingface.co/docs/transformers/en/main_classes/model#transformers.PreTrainedModel.from_pretrained).
 
 > [!NOTE]
-> The Huggingface model architectures that can be optimized with FMO is specified in [Supported Features & Model Architecture](#supported-features--model-architecture).
+> The list of Hugging Face model architectures that can be optimized with FMO is specified in [Supported Features & Model Architecture](#supported-features--model-architecture).
 
 
 # Table of Contents
 - [Quick Installation](#quick-installation)
 - [Supported Features & Model Architecture](#supported-features--model-architecture)
 - [User Guides](#user-guides)
-- [How to Serve Optimized Model?](#how-to-serve-optimized-model-with-frinedli-engine)
+- [Serving an Optimized Model](#how-to-serve-an-optimized-model-with-friendli-engine)
 
 
 # Quick Installation
@@ -47,7 +47,7 @@ pip install friendli-model-optimizer
 
 
 # Supported Features & Model Architecture
-FMO currently supports the following PTQ(Post-Training Quantization) techniques:
+FMO currently supports the following PTQ (Post-Training Quantization) techniques:
 
 ## FP8
 
@@ -59,9 +59,9 @@ This leads to increased throughput and reduced latency while maintaining high ou
 > FP8 is only supported by NVIDIA Ada, Hopper, and Blackwell GPU architectures.
 
 > [!NOTE]
-> For now, we only support E4M3 (4-bit exponent and 3-bit mantissa) encoding format.
+> For now, we only support the E4M3 (4-bit exponent and 3-bit mantissa) encoding format.
 
-### Supported Model Architecutre for FP8 Quantization
+### Supported Model Architectures for FP8 Quantization
 - `LlamaForCausalLM`
 - `MistralForcausalLM`
 - `CohereForCausalLM`
@@ -77,9 +77,9 @@ This leads to increased throughput and reduced latency while maintaining high ou
 
 INT8 Quantization represents weights and activations using the INT8 format with acceptable accuracy drops.
 Friendli Engine enables dynamic activation scaling, where scales are computed on the fly during runtime.
-Thus, FMO only quantize weight, and Friendli Engine will load quantized weight.
+Thus, FMO only quantizes model weights, and Friendli Engine will load the quantized weights.
 
-### Supported Model Architecutre for INT8 Quantization
+### Supported Model Architectures for INT8 Quantization
 - `LlamaForCausalLM`
 - `MistralForcausalLM`
 - `CohereForCausalLM`
@@ -100,14 +100,11 @@ fmo quantize \
 The command line arguments means :
 - **`model-name-or-path`**: Hugging Face pretrained model name or directory path of the saved model checkpoint.
 - **`output-dir`**: Directory path to save the quantized checkpoint and related configurations.
-- **`mode`**: Qantization techniques to apply. You can use `fp8`, `int8`.
+- **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`.
 - **`device`**: Device to run the quantization process. Defaults to "cuda:0".
 - **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to true.
 
-> [!TIP]
-> If you want to use more advanced quantization options(e.g., calibration dataset), Please checkout our [official documentations](https://docs.friendli.ai/guides/container/running_friendli_container/quantization).
-
-## Example: Run FP8 uantization with Meta-Llama-3-8B-Instruct
+## Example: Run FP8 quantization with Meta-Llama-3-8B-Instruct
 ```bash
 export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3-8B-Instruct"
 export OUTPUT_DIR="./"
@@ -120,6 +117,6 @@ fmo quantize \
 --offload
 ```
 
-# How to serve optimized model with Frinedli Engine?
-If your optimized model is ready, now, you can serve the model with Friendli Engine.\
-Please checkout our [official documentations](https://docs.friendli.ai/guides/container/running_friendli_container/quantization) to learn more!
+# How to serve an optimized model with Friendli Engine?
+Once your optimized model is ready, you can serve the model with Friendli Engine.\
+Please check out our [official documentation](https://docs.friendli.ai/guides/container/running_friendli_container) to learn more!
