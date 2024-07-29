@@ -32,6 +32,8 @@ FMO is designed to work with Hugging Face pretrained models, which can be loaded
 > [!NOTE]
 > The list of Hugging Face model architectures that can be optimized with FMO is specified in [Supported Features & Model Architecture](#supported-features--model-architecture).
 
+> [!NOTE]
+> Currently, FMO supports Python3.8 to Python3.11.
 
 # Table of Contents
 - [Quick Installation](#quick-installation)
