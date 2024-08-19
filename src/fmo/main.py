@@ -59,6 +59,15 @@ def quantize(
         "--mode",
         help=("Qantization techniques to apply. You can use `fp8`, and `int8`."),
     ),
+    pedantic_level: int = typer.Option(
+        1,
+        "--pedantic-level",
+        help=(
+            "Higher pedantic level ensure a more accurate representation of the model,"
+            "but increase the quantization processing time. Lower levels allow for faster"
+            "quantization, but may sacrifice some model accuracy. Defaults to 1."
+        ),
+    ),
     device: Optional[str] = typer.Option(
         "cuda:0",
         "--device",
@@ -94,7 +103,7 @@ def quantize(
         help=("Huggingface dataset column name for gathering sample activations."),
     ),
     dataset_num_samples: int = typer.Option(
-        128,
+        512,
         "--dataset-num-samples",
         help=("The number of samples for gathering sample activations."),
     ),
@@ -153,6 +162,7 @@ def quantize(
         device=device,
         offload=offload,
         calib_dataloader=calib_dataloader,
+        pedantic_level=pedantic_level,
     )
 
     msg = (
