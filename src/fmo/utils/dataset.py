@@ -17,6 +17,7 @@ from transformers import AutoTokenizer, PreTrainedTokenizer  # type: ignore
 def safe_load_datasets(
     dataset_name_or_path: str,
     split_name: Optional[str],
+    cache_dir: Optional[str] = None,
 ) -> datasets.Dataset:
     """Load dataset from calibration dataset config."""
     try:
@@ -28,11 +29,13 @@ def safe_load_datasets(
         else:
             data_name_parts = dataset_name_or_path.split(":")
             if len(data_name_parts) == 1:
-                dataset = datasets.load_dataset(dataset_name_or_path, split=split_name)
+                dataset = datasets.load_dataset(
+                    dataset_name_or_path, split=split_name, cache_dir=cache_dir
+                )
             elif len(data_name_parts) == 2:
                 data_name, subset_name = data_name_parts
                 dataset = datasets.load_dataset(
-                    data_name, subset_name, split=split_name
+                    data_name, subset_name, split=split_name, cache_dir=cache_dir
                 )
             else:
                 raise QuantizationError(

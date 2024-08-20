@@ -79,7 +79,7 @@ def quantize(
         False,
         "--offload",
         help=(
-            "When enabled, significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to true."
+            "When enabled, significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False."
         ),
     ),
     seed: Optional[int] = typer.Option(
@@ -138,7 +138,9 @@ def quantize(
         os.mkdir(output_dir)
 
     dataset = safe_load_datasets(
-        dataset_name_or_path=dataset_name_or_path, split_name=dataset_split_name
+        dataset_name_or_path=dataset_name_or_path,
+        split_name=dataset_split_name,
+        cache_dir=cache_dir,
     )
     tokenizer = get_tokenizer(
         model_name_or_path=model_name_or_path, cache_dir=cache_dir

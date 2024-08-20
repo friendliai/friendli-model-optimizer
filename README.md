@@ -116,7 +116,7 @@ The command line arguments means :
 - **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`.
 - **`pedantic-level`**: Represent to accuracy-latency trade-off. Higher pedantic level ensure a more accurate representaition of the model, but increase the quantization processing time. Defaults to 1.
 - **`device`**: Device to run the quantization process. Defaults to "cuda:0".
-- **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to true.
+- **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False.
 
 ## Example: Run FP8 quantization with Meta-Llama-3-8B-Instruct
 ```bash
