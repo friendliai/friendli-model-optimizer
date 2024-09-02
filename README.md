@@ -122,12 +122,16 @@ The command line arguments means :
 ```bash
 export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3.1-8B-Instruct"
 export OUTPUT_DIR="./"
+export QUANTIZATION_SCHEME=fp8
+export PEDANTIC_LEVEL=1
+export DEVICE=1
 
 fmo quantize \
 --model-name-or-path $MODEL_NAME_OR_PATH \
 --output-dir $OUTPUT_DIR \
---mode "fp8" \
---device "cuda:0" \
+--mode $QUANTIZATION_SCHEME \
+--pedantic-level $PEDANTIC_LEVEL \
+--device $DEVICE \
 --offload
 ```
 
