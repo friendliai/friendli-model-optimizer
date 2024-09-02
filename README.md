@@ -118,18 +118,27 @@ The command line arguments means :
 - **`device`**: Device to run the quantization process. Defaults to "cuda:0".
 - **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False.
 
-## Example: Run FP8 quantization with Meta-Llama-3-8B-Instruct
+## Example: Run FP8 quantization with Meta-Llama-3.1-8B-Instruct
 ```bash
-export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3-8B-Instruct"
+export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3.1-8B-Instruct"
 export OUTPUT_DIR="./"
+export QUANTIZATION_SCHEME=fp8
+export PEDANTIC_LEVEL=1
+export DEVICE=1
 
 fmo quantize \
 --model-name-or-path $MODEL_NAME_OR_PATH \
 --output-dir $OUTPUT_DIR \
---mode "fp8" \
---device "cuda:0" \
+--mode $QUANTIZATION_SCHEME \
+--pedantic-level $PEDANTIC_LEVEL \
+--device $DEVICE \
 --offload
 ```
+
+If successfully run, you will see the progress of the quantization as shown in the screenshot below:
+
+![image](https://github.com/user-attachments/assets/0005d4c6-2639-4aa6-93c3-9674321f08c7)
+
 
 # How to serve an optimized model with Friendli Engine?
 Once your optimized model is ready, you can serve the model with Friendli Engine.\
