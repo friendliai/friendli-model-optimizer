@@ -37,7 +37,7 @@ FMO currently utilizes **a single GPU** for running optimizations. But, it can g
 
 # What's NEW? (latest: v0.7.0)
 - Further optimization for running FP8, and INT8 quantization.
-- Support searching automatic calibration dataset batch size for running Fom.
+- Support searching automatic calibration dataset batch size for running FMO.
 - Support [AWQ(Activation-aware Weight Quantization)].
 
 
