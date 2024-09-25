@@ -1,22 +1,26 @@
 # Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
-# pylint: disable=no-value-for-parameter, no-name-in-module
+# pylint: disable=no-value-for-parameter,no-name-in-module,too-many-positional-arguments
 
 """FMO-CLI Dataset Utils."""
 from __future__ import annotations
 
 import os
+import sys
 from typing import Optional
 
 import datasets  # type: ignore
 import torch
-from fmo_core import NotSupportedError, QuantizationError  # type: ignore
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, PreTrainedTokenizer  # type: ignore
+
+from fmo.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def safe_load_datasets(
     dataset_name_or_path: str,
-    split_name: Optional[str],
+    split_name: Optional[str] = None,
     cache_dir: Optional[str] = None,
 ) -> datasets.Dataset:
     """Load dataset from calibration dataset config."""
@@ -38,17 +42,19 @@ def safe_load_datasets(
                     data_name, subset_name, split=split_name, cache_dir=cache_dir
                 )
             else:
-                raise QuantizationError(
+                logger.error(
                     "Dataset name is in invalid format. "
                     "(valid format: '<dataset_name>' or '<dataset_name>:<subset_name>')"
                 )
-    except ValueError as err:
-        raise QuantizationError(f"datasets.load_dataset failed. {str(err)}") from err
+                sys.exit(1)
+
+    except ValueError as e:
+        logger.error("datasets.load_dataset failed. %s", e)
+        sys.exit(1)
 
     if not isinstance(dataset, datasets.Dataset):
-        raise QuantizationError(
-            "This dataset format is not supported for the calibration."
-        )
+        logger.error("This dataset format is not supported for the calibration.")
+        sys.exit(1)
 
     return dataset
 
@@ -65,13 +71,13 @@ def get_tokenizer(
             cache_dir=cache_dir,
             trust_remote_code=True,
         )
-    except OSError as exc:
-        raise NotSupportedError(str(exc)) from exc
+    except OSError as e:
+        logger.error(e)
+        sys.exit(1)
 
     if not tokenizer.is_fast:
-        raise NotSupportedError(
-            "This model does not support Friendli-compatible tokenizer"
-        )
+        logger.error("This model does not support Friendli-compatible tokenizer")
+        sys.exit(1)
 
     if tokenizer.pad_token != "<unk>":
         tokenizer.pad_token = tokenizer.eos_token
@@ -81,20 +87,21 @@ def get_tokenizer(
     return tokenizer
 
 
-def get_calib_dataloader(  # pylint: disable=too-many-arguments
+def get_encoded_dataset(  # pylint: disable=too-many-arguments
     tokenizer: PreTrainedTokenizer,
     dataset: datasets.Dataset,
     lookup_column_name: str,
-    seed: Optional[int] = 42,
-    max_length: Optional[int] = 512,
-    num_samples: Optional[int] = 512,
-    batch_size: Optional[int] = 32,
+    seed: int = 42,
+    max_length: int = 2048,
+    num_samples: int = 512,
 ) -> DataLoader:
     """Return Calibration DataLoader."""
+    if num_samples == 1:
+        num_samples *= 2
     try:
-        dataset = dataset.shuffle(seed=seed).select(range(num_samples * 2))  # type: ignore
+        dataset = dataset.shuffle(seed=seed).select(range(num_samples))  # type: ignore
         encoded_ds_w_special_tokens = tokenizer(
-            dataset[lookup_column_name][:num_samples],
+            dataset[lookup_column_name][: num_samples // 2],
             return_tensors="pt",
             truncation=True,
             padding=True,
@@ -102,7 +109,7 @@ def get_calib_dataloader(  # pylint: disable=too-many-arguments
             add_special_tokens=True,
         ).input_ids
         encoded_ds_wo_special_tokens = tokenizer(
-            dataset[lookup_column_name][num_samples:],
+            dataset[lookup_column_name][num_samples // 2 :],
             return_tensors="pt",
             truncation=True,
             padding=True,
@@ -130,9 +137,10 @@ def get_calib_dataloader(  # pylint: disable=too-many-arguments
             [encoded_ds_w_special_tokens, encoded_ds_wo_special_tokens], dim=0
         )
 
-    except KeyError as exc:
-        raise NotSupportedError(
-            f"`{lookup_column_name}` is not valid column name in given dataset."
-        ) from exc
+    except KeyError as e:
+        logger.error(
+            "`%s` is not valid column name in given dataset. %s", lookup_column_name, e
+        )
+        sys.exit(1)
 
-    return DataLoader(encoded_dataset, batch_size=batch_size)  # type: ignore
+    return encoded_dataset  # type: ignore

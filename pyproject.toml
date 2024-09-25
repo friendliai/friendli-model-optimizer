@@ -4,19 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "friendli-model-optimizer"
-version = "0.5.1"
+version = "0.7.0"
 authors = [
   { name = "FriendliAI teams", email = "eng@friendli.ai" },
 ]
 requires-python=">=3.8,<3.12"
 description = "Model Optimizer CLI for Friendli Engine."
 dependencies = [
-  "transformers>=4.43.1",
+  "transformers>=4.44.2",
   "datasets",
   "typer",
   "torch>=2.0.0",
   "accelerate",
-  "fmo-core==0.5",
+  "fmo-core==0.7",
 ]
 keywords = [ "generative-ai", "llm", "quantization" ]
 readme = "README.txt"
@@ -101,6 +101,7 @@ disable = [
     "unsubscriptable-object",
     "consider-using-set-comprehension",
     "redefined-outer-name",
+    "unknown-option-value"
 ]
 extension-pkg-whitelist = "pydantic"
 

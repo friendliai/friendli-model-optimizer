@@ -1,18 +1,22 @@
 # Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
-# pylint: disable=line-too-long, too-many-arguments, no-name-in-module
+# pylint: disable=line-too-long, too-many-arguments, no-name-in-module, too-many-positional-arguments
 """Frienli-Model-Optimizer (FMO) CLI."""
 
 from __future__ import annotations
 
 import os
+import sys
 from enum import Enum
 from typing import Optional
 
 import typer
 
-from fmo.utils.dataset import get_calib_dataloader, get_tokenizer, safe_load_datasets
+from fmo.logging import get_logger
+from fmo.utils.dataset import get_encoded_dataset, get_tokenizer, safe_load_datasets
 from fmo.utils.format import secho_error_and_exit
 from fmo.utils.version import get_installed_version
+
+logger = get_logger(__name__)
 
 app = typer.Typer(
     help="Friendli Model Optimizer 🚀",
@@ -28,6 +32,7 @@ class QuantMode(str, Enum):
 
     INT8 = "int8"
     FP8 = "fp8"
+    AWQ = "awq"
 
 
 @app.command()
@@ -57,7 +62,7 @@ def quantize(
     mode: QuantMode = typer.Option(
         ...,
         "--mode",
-        help=("Qantization techniques to apply. You can use `fp8`, and `int8`."),
+        help=("Qantization techniques to apply. You can use `fp8`, `int8`, and `awq`."),
     ),
     pedantic_level: int = typer.Option(
         1,
@@ -82,9 +87,7 @@ def quantize(
             "When enabled, significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False."
         ),
     ),
-    seed: Optional[int] = typer.Option(
-        42, "--seed", help=("Seed for dataset sampling.")
-    ),
+    seed: int = typer.Option(42, "--seed", help="Seed for dataset sampling."),
     dataset_name_or_path: str = typer.Option(
         "abisee/cnn_dailymail:3.0.0",
         "--dataset-name-or-path",
@@ -108,16 +111,19 @@ def quantize(
         help=("The number of samples for gathering sample activations."),
     ),
     dataset_max_length: int = typer.Option(
-        512,
+        1024,
         "--dataset-max-length",
         help=(
             "The maximum legth of sample in the dataset for gathering sample activations."
         ),
     ),
-    dataset_batch_size: int = typer.Option(
-        32,
+    dataset_batch_size: Optional[int] = typer.Option(
+        None,
         "--dataset-batch-size",
-        help=("The batch size of the dataset for gathering sample activations."),
+        help=(
+            "Batch size for collecting dataset sample activations. Defaults to None."
+            "If None, FMO search automatically determines an appropriate batch size."
+        ),
     ),
     cache_dir: Optional[str] = typer.Option(
         None, "--cache-dir", help="Directory path of the cached model checkpoint."
@@ -128,7 +134,7 @@ def quantize(
 ):
     """Quantize huggingface's model."""
     # pylint: disable=too-many-locals, import-outside-toplevel
-    from fmo_core import quantize  # type: ignore
+    from fmo_core import FMOException, quantize  # type: ignore
 
     # pylint: enable=import-outside-toplevel
 
@@ -145,27 +151,31 @@ def quantize(
     tokenizer = get_tokenizer(
         model_name_or_path=model_name_or_path, cache_dir=cache_dir
     )
-    calib_dataloader = get_calib_dataloader(
+    encoded_dataset = get_encoded_dataset(
         dataset=dataset,
         lookup_column_name=dataset_target_column_name,
         max_length=dataset_max_length,
         num_samples=dataset_num_samples,
-        batch_size=dataset_batch_size,
         seed=seed,
         tokenizer=tokenizer,
     )
 
-    quantize(
-        model_name_or_path,
-        mode,
-        dry_run=dry_run,
-        save_dir=output_dir,
-        cache_dir=cache_dir,
-        device=device,
-        offload=offload,
-        calib_dataloader=calib_dataloader,
-        pedantic_level=pedantic_level,
-    )
+    try:
+        quantize(
+            model_name_or_path,
+            mode,
+            dry_run=dry_run,
+            save_dir=output_dir,
+            cache_dir=cache_dir,
+            device=device,
+            offload=offload,
+            batch_size=dataset_batch_size,
+            encoded_dataset=encoded_dataset,
+            pedantic_level=pedantic_level,
+        )
+    except FMOException as e:
+        logger.error(e)
+        sys.exit(1)
 
     msg = (
         f"Checkpoint({model_name_or_path}) can be converted."

@@ -7,8 +7,6 @@ from __future__ import annotations
 import logging
 import os
 
-_formatter = logging.Formatter()
-
 
 class ColorFormatter(logging.Formatter):
     """Customized formatter with ANSI color."""
@@ -49,6 +47,10 @@ def get_logger(name: str) -> logging.Logger:
     """Get a formatted logger."""
     logger = logging.getLogger(name)
 
+    if logger.hasHandlers():
+        for handler in logger.handlers:
+            logger.removeHandler(handler)
+
     handler = logging.StreamHandler()
     formatter = ColorFormatter()
     handler.setFormatter(formatter)
@@ -56,6 +58,3 @@ def get_logger(name: str) -> logging.Logger:
     logger.setLevel(os.environ.get("FMO_LOG_LEVEL", "INFO"))
 
     return logger
-
-
-logger = get_logger("FMO")
