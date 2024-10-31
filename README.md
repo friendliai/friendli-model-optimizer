@@ -35,10 +35,11 @@ FMO currently supports PTQ(Post Training Quantization) algorithms, FP8, INT8 and
 FMO currently utilizes **a single GPU** for running optimizations. But, it can generate optimized model checkpoints for large models like LLaMA-3.1-70B and LLaMA-3.1-405B! Additionally, even for FP8 precision, you are not restricted to using GPUs that support FP8.
 
 
-# What's NEW? (latest: v0.7.0)
+# What's NEW? (latest: v0.8.0)
 - Further optimization for running FP8, and INT8 quantization.
 - Support searching automatic calibration dataset batch size for running FMO.
 - Support [AWQ(Activation-aware Weight Quantization)].
+- Support ExaoneForCausalLM.
 
 
 # Table of Contents
@@ -75,6 +76,7 @@ FP8 support 1-2 pedantic level. Defaults to 1.
 
 ### Supported Model Architectures for FP8 Quantization
 - `CohereForCausalLM`
+- `ExaoneForCausalLM`
 - `Gemma2ForCausalLM`
 - `LlamaForCausalLM`
 - `MistralForcausalLM`
@@ -90,6 +92,7 @@ Friendli Engine enables dynamic activation scaling, where scales are computed on
 
 ### Supported Model Architectures for INT8 Quantization
 - `CohereForCausalLM`
+- `ExaoneForCausalLM`
 - `Gemma2ForCausalLM`
 - `LlamaForCausalLM`
 - `MistralForcausalLM`
@@ -106,6 +109,7 @@ To learn more about AWQ, refer to [this article](https://friendli.ai/blog/activa
 
 ### Supported Model Architectures for INT8 Quantization
 - `CohereForCausalLM`
+- `ExaoneForCausalLM`
 - `Gemma2ForCausalLM`
 - `LlamaForCausalLM`
 - `MistralForcausalLM`

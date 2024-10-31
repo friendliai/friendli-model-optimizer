@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "friendli-model-optimizer"
-version = "0.7.0"
+version = "0.8.0"
 authors = [
   { name = "FriendliAI teams", email = "eng@friendli.ai" },
 ]
@@ -16,7 +16,7 @@ dependencies = [
   "typer",
   "torch>=2.0.0",
   "accelerate",
-  "fmo-core==0.7",
+  "fmo-core==0.8",
 ]
 keywords = [ "generative-ai", "llm", "quantization" ]
 readme = "README.txt"
