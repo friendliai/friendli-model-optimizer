@@ -148,7 +148,6 @@ fmo quantize \
 --output-dir $OUTPUT_DIR \
 --mode "fp8" \
 --device "cuda:0" \
---offload
 ```
 
 Once your optimized model is ready, you can serve the model with Friendli Engine.
