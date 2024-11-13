@@ -140,11 +140,7 @@ The command line arguments means :
 - **`dataset-name-or-path`**: Hugging Face dataset name or directory path of the local dataset file. If you use a single file, you can set this option to the path of the file and set `local-dataset-type` to the appropriate type.
 - **`local-dataset-type`**: Type of the local dataset file. Set this only when you use a local dataset file. Defaults to `inferred`. You can choose from `inferred`, `json`, `csv`, `parquet`, and `arrow`.
 - **`dataset-split-name`**: The split of the dataset to use (e.g., "train", "test", "validation"). Defaults to "test".
-- **`dataset-target-column-name`**: The name of the column in your dataset containing the text to be processed. For example:
-  - "article" for CNN/DailyMail dataset
-  - "text" for many standard datasets
-  - "content" for custom datasets
-  Defaults to "article". Note that if you want to apply a chat template, you should preprocess your dataset to have a single field for the formatted text.
+- **`dataset-target-column-name`**: The name of the column in your dataset containing the text to be processed (for example: "article" for CNN/DailyMail dataset, "text" for many standard datasets). Defaults to "article". Note that if you want to apply a chat template, you should preprocess your dataset to have a single field for the formatted texts.
 - **`dataset-num-samples`**: Number of samples to use from the dataset for calibration. More samples may improve quantization quality but increase processing time. Defaults to 512.
 - **`dataset-max-length`**: Maximum length (in tokens) for each sample from the dataset. Longer sequences will be truncated. Defaults to 1024.
 - **`dataset-batch-size`**: Number of samples to process simultaneously during calibration. If not specified (None), FMO will automatically determine an optimal batch size based on available GPU memory.
