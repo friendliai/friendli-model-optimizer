@@ -132,8 +132,9 @@ fmo quantize \
 ```
 The command line arguments means :
 - **`model-name-or-path`**: Hugging Face pretrained model name or directory path of the saved model checkpoint.
+- **`local-dataset-type`**: Type of the local dataset file. Defaults to `inferred`. You can choose from `inferred`, `json`, `csv`, `parquet`, and `arrow`.
 - **`output-dir`**: Directory path to save the quantized checkpoint and related configurations.
-- **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`.
+- **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`, and `awq`.
 - **`pedantic-level`**: Represent to accuracy-latency trade-off. Higher pedantic level ensure a more accurate representaition of the model, but increase the quantization processing time. Defaults to 1.
 - **`device`**: Device to run the quantization process. Defaults to "cuda:0".
 - **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False.
