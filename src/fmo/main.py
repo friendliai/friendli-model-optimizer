@@ -35,6 +35,43 @@ class QuantMode(str, Enum):
     AWQ = "awq"
 
 
+# Used to specify the type of the local dataset file when using HuggingFace's
+# Datasets library.
+class LocalDatasetType(str, Enum):
+    """Local Dataset Type."""
+
+    # Inferred from the extension of the dataset file.
+    INFERRED = "inferred"
+    # Supported types are listed in the following.
+    # https://huggingface.co/docs/datasets/en/loading#local-and-remote-files
+    JSON = "json"
+    CSV = "csv"
+    PARQUET = "parquet"
+    ARROW = "arrow"
+
+    def to_string(self, path: str) -> str:
+        """
+        Returns the string representation of the local dataset type.
+        If the dataset type is INFERRED, it infers the type from the extension
+        of the given dataset file path.
+        """
+        if self != LocalDatasetType.INFERRED:
+            return self.value
+
+        switch = {
+            "json": LocalDatasetType.JSON,
+            "csv": LocalDatasetType.CSV,
+            "parquet": LocalDatasetType.PARQUET,
+            "arrow": LocalDatasetType.ARROW,
+        }
+        extension = path.split(".")[-1]
+        if extension not in switch:
+            raise ValueError(
+                f"Unsupported dataset file extension: {extension}"
+            )
+        return switch[extension].value
+
+
 @app.command()
 def version():
     """Check the installed package version."""
@@ -95,6 +132,15 @@ def quantize(
             "Huggingface dataset name or directory path for gathering sample activations."
         ),
     ),
+    local_dataset_type: LocalDatasetType = typer.Option(
+        LocalDatasetType.INFERRED,
+        "--local-dataset-type",
+        help=(
+            "Type of the local dataset file. See "
+            "https://huggingface.co/docs/datasets/en/loading#local-and-remote-files "
+            "for more details."
+        ),
+    ),
     dataset_split_name: str = typer.Option(
         "test",
         "--dataset-split-name",
@@ -145,6 +191,7 @@ def quantize(
 
     dataset = safe_load_datasets(
         dataset_name_or_path=dataset_name_or_path,
+        local_dataset_type=local_dataset_type.to_string(dataset_name_or_path),
         split_name=dataset_split_name,
         cache_dir=cache_dir,
     )
