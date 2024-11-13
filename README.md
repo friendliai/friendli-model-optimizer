@@ -133,10 +133,17 @@ fmo quantize \
 The command line arguments means :
 - **`model-name-or-path`**: Hugging Face pretrained model name or directory path of the saved model checkpoint.
 - **`output-dir`**: Directory path to save the quantized checkpoint and related configurations.
-- **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`.
+- **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`, and `awq`.
 - **`pedantic-level`**: Represent to accuracy-latency trade-off. Higher pedantic level ensure a more accurate representaition of the model, but increase the quantization processing time. Defaults to 1.
 - **`device`**: Device to run the quantization process. Defaults to "cuda:0".
 - **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False.
+- **`dataset-name-or-path`**: Hugging Face dataset name or directory path of the local dataset file. If you use a single file, you can set this option to the path of the file and set `local-dataset-type` to the appropriate type.
+- **`local-dataset-type`**: Type of the local dataset file. Set this only when you use a local dataset file. Defaults to `inferred`. You can choose from `inferred`, `json`, `csv`, `parquet`, and `arrow`.
+- **`dataset-split-name`**: The split of the dataset to use (e.g., "train", "test", "validation"). Defaults to "test".
+- **`dataset-target-column-name`**: The name of the column in your dataset containing the text to be processed (for example: "article" for CNN/DailyMail dataset, "text" for many standard datasets). Defaults to "article". Note that if you want to apply a chat template, you should preprocess your dataset to have a single field for the formatted texts.
+- **`dataset-num-samples`**: Number of samples to use from the dataset for calibration. More samples may improve quantization quality but increase processing time. Defaults to 512.
+- **`dataset-max-length`**: Maximum length (in tokens) for each sample from the dataset. Longer sequences will be truncated. Defaults to 1024.
+- **`dataset-batch-size`**: Number of samples to process simultaneously during calibration. If not specified (None), FMO will automatically determine an optimal batch size based on available GPU memory.
 
 ## Example: Run FP8 quantization with Meta-Llama-3-8B-Instruct
 ```bash

@@ -20,6 +20,7 @@ logger = get_logger(__name__)
 
 def safe_load_datasets(
     dataset_name_or_path: str,
+    local_dataset_type: str,
     split_name: Optional[str] = None,
     cache_dir: Optional[str] = None,
 ) -> datasets.Dataset:
@@ -27,6 +28,7 @@ def safe_load_datasets(
     try:
         if os.path.exists(dataset_name_or_path):
             dataset = datasets.load_dataset(
+                local_dataset_type,
                 data_files=dataset_name_or_path,
                 split=split_name,
             )
