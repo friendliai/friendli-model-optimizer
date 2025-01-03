@@ -35,6 +35,12 @@ class QuantMode(str, Enum):
     AWQ = "awq"
 
 
+class ModelLoadClsType(str, Enum):
+    """AutoClass Type for model loading."""
+
+    AUTO_MODEL_FOR_CAUSAL_LM = "AutoModelForCausalLM"
+
+
 @app.command()
 def version():
     """Check the installed package version."""
@@ -74,7 +80,7 @@ def quantize(
         ),
     ),
     device: Optional[str] = typer.Option(
-        "cuda:0",
+        "cuda",
         "--device",
         help=(
             "The device which is used for quantization process. Currently we use only one GPU."
@@ -85,6 +91,23 @@ def quantize(
         "--offload",
         help=(
             "When enabled, significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False."
+        ),
+    ),
+    trust_remote_code: Optional[bool] = typer.Option(
+        False,
+        "--trust-remote-code",
+        help=(
+            "When enabled, load model with custome code in Huggingface Hub."
+            "Also, for using this option, the `--model-load-cls-type` should be specified."
+        ),
+    ),
+    model_load_cls_type: Optional[ModelLoadClsType] = typer.Option(
+        None,
+        "--model-load-cls-type",
+        help=(
+            "When `--trust-remote-code` is given, FMO loads model with AutoClasses of `transformers`."
+            "For selecting type of AutoClass, the name of AutoClass should be specified."
+            "Currently supported AutoClasses: 'AutoModelForCausalLM'."
         ),
     ),
     seed: int = typer.Option(42, "--seed", help="Seed for dataset sampling."),
@@ -172,6 +195,8 @@ def quantize(
             batch_size=dataset_batch_size,
             encoded_dataset=encoded_dataset,
             pedantic_level=pedantic_level,
+            trust_remote_code=trust_remote_code,
+            model_load_cls_type=model_load_cls_type,
         )
     except FMOException as e:
         logger.error(e)

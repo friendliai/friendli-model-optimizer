@@ -4,19 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "friendli-model-optimizer"
-version = "0.8.0"
+version = "0.9.0"
 authors = [
   { name = "FriendliAI teams", email = "eng@friendli.ai" },
 ]
-requires-python=">=3.8,<3.12"
+requires-python=">=3.9,<3.12"
 description = "Model Optimizer CLI for Friendli Engine."
 dependencies = [
-  "transformers>=4.44.2",
+  "transformers>=4.47.1",
   "datasets",
   "typer",
   "torch>=2.0.0",
   "accelerate",
-  "fmo-core==0.8",
+  "fmo-core==0.9",
 ]
 keywords = [ "generative-ai", "llm", "quantization" ]
 readme = "README.txt"
@@ -28,7 +28,6 @@ classifiers=[
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

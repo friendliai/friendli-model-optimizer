@@ -35,11 +35,10 @@ FMO currently supports PTQ(Post Training Quantization) algorithms, FP8, INT8 and
 FMO currently utilizes **a single GPU** for running optimizations. But, it can generate optimized model checkpoints for large models like LLaMA-3.1-70B and LLaMA-3.1-405B! Additionally, even for FP8 precision, you are not restricted to using GPUs that support FP8.
 
 
-# What's NEW? (latest: v0.8.0)
-- Further optimization for running FP8, and INT8 quantization.
-- Support searching automatic calibration dataset batch size for running FMO.
-- Support [AWQ(Activation-aware Weight Quantization)].
-- Support ExaoneForCausalLM.
+# What's NEW? (latest: v0.9.0)
+- Support FP8, INT8, and AWQ for `Qwen2-VL`
+- More accurate quantization for FP8, INT8, and AWQ.
+- Deprecate Python3.8 support.
 
 
 # Table of Contents
@@ -84,6 +83,7 @@ FP8 support 1-2 pedantic level. Defaults to 1.
 - `MptForCausalLM`
 - `Phi3ForCausalLM`
 - `Qwen2ForCausalLM`
+- `Qwen2VLForConditionalGeneration`
 
 ## INT8
 
@@ -135,19 +135,20 @@ The command line arguments means :
 - **`output-dir`**: Directory path to save the quantized checkpoint and related configurations.
 - **`mode`**: Quantization techniques to apply. You can use `fp8`, `int8`.
 - **`pedantic-level`**: Represent to accuracy-latency trade-off. Higher pedantic level ensure a more accurate representaition of the model, but increase the quantization processing time. Defaults to 1.
-- **`device`**: Device to run the quantization process. Defaults to "cuda:0".
+- **`device`**: Device to run the quantization process. Defaults to "cuda".
 - **`offload`**: When enabled, this option significantly reduces GPU memory usage by offloading model layers onto CPU RAM. Defaults to False.
 
 ## Example: Run FP8 quantization with Meta-Llama-3-8B-Instruct
 ```bash
 export MODEL_NAME_OR_PATH="meta-llama/Meta-Llama-3-8B-Instruct"
 export OUTPUT_DIR="./"
+export CUDA_VISIBLE_DEVICES=0
 
 fmo quantize \
 --model-name-or-path $MODEL_NAME_OR_PATH \
 --output-dir $OUTPUT_DIR \
 --mode "fp8" \
---device "cuda:0" \
+--device "cuda" \
 ```
 
 Once your optimized model is ready, you can serve the model with Friendli Engine.
