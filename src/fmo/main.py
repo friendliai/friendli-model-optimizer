@@ -12,7 +12,7 @@ from typing import Optional
 import typer
 
 from fmo.logging import get_logger
-from fmo.utils.dataset import get_encoded_dataset, get_tokenizer, safe_load_datasets
+from fmo.utils.dataset import get_tokenizer, load_dataset_from_hf
 from fmo.utils.format import secho_error_and_exit
 from fmo.utils.version import get_installed_version
 
@@ -160,27 +160,24 @@ def quantize(
     from fmo_core import FMOException, quantize  # type: ignore
 
     # pylint: enable=import-outside-toplevel
-
     if not os.path.isdir(output_dir):
         if os.path.exists(output_dir):
             secho_error_and_exit(f"'{output_dir}' exists, but it is not a directory.")
         os.mkdir(output_dir)
 
-    dataset = safe_load_datasets(
-        dataset_name_or_path=dataset_name_or_path,
-        split_name=dataset_split_name,
-        cache_dir=cache_dir,
-    )
+    logger.info("Load dataset from huggingface hub. repo_id: %s.", dataset_name_or_path)
     tokenizer = get_tokenizer(
         model_name_or_path=model_name_or_path, cache_dir=cache_dir
     )
-    encoded_dataset = get_encoded_dataset(
-        dataset=dataset,
-        lookup_column_name=dataset_target_column_name,
-        max_length=dataset_max_length,
-        num_samples=dataset_num_samples,
-        seed=seed,
+    calib_dataset = load_dataset_from_hf(
+        dataset_name_or_path=dataset_name_or_path,
+        dataset_target_column_name=dataset_target_column_name,
+        dataset_max_length=dataset_max_length,
+        dataset_num_samples=dataset_num_samples,
+        dataset_split_name=dataset_split_name,
+        cache_dir=cache_dir,
         tokenizer=tokenizer,
+        seed=seed,
     )
 
     try:
@@ -193,7 +190,7 @@ def quantize(
             device=device,
             offload=offload,
             batch_size=dataset_batch_size,
-            encoded_dataset=encoded_dataset,
+            calib_dataset=calib_dataset,
             pedantic_level=pedantic_level,
             trust_remote_code=trust_remote_code,
             model_load_cls_type=model_load_cls_type,

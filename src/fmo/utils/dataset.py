@@ -1,5 +1,5 @@
 # Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
-# pylint: disable=no-value-for-parameter,no-name-in-module,too-many-positional-arguments
+# pylint: disable=no-value-for-parameter,no-name-in-module,too-many-positional-arguments,too-many-arguments
 
 """FMO-CLI Dataset Utils."""
 from __future__ import annotations
@@ -9,9 +9,12 @@ import sys
 from typing import Optional
 
 import datasets  # type: ignore
-import torch
-from torch.utils.data import DataLoader
-from transformers import AutoTokenizer, PreTrainedTokenizer  # type: ignore
+from torch.utils.data import ConcatDataset, Dataset
+from transformers import (  # type: ignore
+    AutoTokenizer,
+    BatchFeature,
+    PreTrainedTokenizer,
+)
 
 from fmo.logging import get_logger
 
@@ -87,60 +90,72 @@ def get_tokenizer(
     return tokenizer
 
 
-def get_encoded_dataset(  # pylint: disable=too-many-arguments
+def load_dataset_from_hf(
+    dataset_name_or_path: str,
+    dataset_target_column_name: str,
+    dataset_max_length: int,
+    dataset_num_samples: int,
+    dataset_split_name: str,
+    cache_dir: Optional[str],
     tokenizer: PreTrainedTokenizer,
-    dataset: datasets.Dataset,
-    lookup_column_name: str,
-    seed: int = 42,
-    max_length: int = 2048,
-    num_samples: int = 512,
-) -> DataLoader:
-    """Return Calibration DataLoader."""
-    if num_samples == 1:
-        num_samples *= 2
-    try:
-        dataset = dataset.shuffle(seed=seed).select(range(num_samples))  # type: ignore
-        encoded_ds_w_special_tokens = tokenizer(
-            dataset[lookup_column_name][: num_samples // 2],
-            return_tensors="pt",
+    seed: int,
+) -> Dataset:
+    """Try to load calibration dataset from huggingface."""
+    hf_dataset = (
+        safe_load_datasets(
+            dataset_name_or_path=dataset_name_or_path,
+            split_name=dataset_split_name,
+            cache_dir=cache_dir,
+        )
+        .shuffle(seed=seed)
+        .select(range(dataset_num_samples))
+    )
+    non_chat_ds_w_special_tokens = TextOnlyCalibDataset(
+        hf_dataset[dataset_target_column_name][: dataset_num_samples // 2],
+        tokenizer,
+        max_length=dataset_max_length,
+        add_special_tokens=False,
+    )
+    non_chat_ds_wo_special_tokens = TextOnlyCalibDataset(
+        hf_dataset[dataset_target_column_name][dataset_num_samples // 2 :],
+        tokenizer,
+        max_length=dataset_max_length,
+        add_special_tokens=True,
+    )
+    return ConcatDataset([non_chat_ds_w_special_tokens, non_chat_ds_wo_special_tokens])
+
+
+class TextOnlyCalibDataset(Dataset):
+    """A dataset for calibration that contains only tokenizable text inputs."""
+
+    def __init__(self, texts, tokenizer, max_length, add_special_tokens=True):
+        """Initialize TextOnlyCalibDataset."""
+        self.texts = texts
+        self.tokenizer = tokenizer
+        self.add_special_tokens = add_special_tokens
+        self.max_length = max_length
+        self.encodings = self._encode_texts()
+
+    def _encode_texts(self):
+        """Encode the input texts using the tokenizer."""
+        return self.tokenizer(
+            self.texts,
+            padding="max_length",
             truncation=True,
-            padding=True,
-            max_length=max_length,
-            add_special_tokens=True,
-        ).input_ids
-        encoded_ds_wo_special_tokens = tokenizer(
-            dataset[lookup_column_name][num_samples // 2 :],
+            max_length=self.max_length,
             return_tensors="pt",
-            truncation=True,
-            padding=True,
-            max_length=max_length,
-            add_special_tokens=False,
-        ).input_ids
-
-        max_length_diff = (
-            encoded_ds_w_special_tokens.shape[-1]
-            - encoded_ds_wo_special_tokens.shape[-1]
-        )
-        if max_length_diff > 0:
-            padded_tokens = torch.full(
-                (encoded_ds_wo_special_tokens.shape[0], max_length_diff),
-                tokenizer.pad_token_id,
-            )
-            encoded_ds_wo_special_tokens = torch.cat(
-                [encoded_ds_wo_special_tokens, padded_tokens], dim=1
-            )
-        assert (
-            encoded_ds_w_special_tokens.shape[-1]
-            == encoded_ds_wo_special_tokens.shape[-1]
-        )
-        encoded_dataset = torch.cat(
-            [encoded_ds_w_special_tokens, encoded_ds_wo_special_tokens], dim=0
+            add_special_tokens=self.add_special_tokens,
         )
 
-    except KeyError as e:
-        logger.error(
-            "`%s` is not valid column name in given dataset. %s", lookup_column_name, e
-        )
-        sys.exit(1)
+    def __len__(self):
+        """Get the number of samples in the dataset."""
+        return len(self.texts)
 
-    return encoded_dataset  # type: ignore
+    def __getitem__(self, idx):
+        """Retrieve a single sample by index."""
+        return BatchFeature(
+            data={
+                "input_ids": self.encodings["input_ids"][idx],
+                "attention_mask": self.encodings["attention_mask"][idx],
+            }
+        )

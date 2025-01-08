@@ -35,10 +35,9 @@ FMO currently supports PTQ(Post Training Quantization) algorithms, FP8, INT8 and
 FMO currently utilizes **a single GPU** for running optimizations. But, it can generate optimized model checkpoints for large models like LLaMA-3.1-70B and LLaMA-3.1-405B! Additionally, even for FP8 precision, you are not restricted to using GPUs that support FP8.
 
 
-# What's NEW? (latest: v0.9.0)
-- Support FP8, INT8, and AWQ for `Qwen2-VL`
-- More accurate quantization for FP8, INT8, and AWQ.
-- Deprecate Python3.8 support.
+# What's NEW? (latest: v0.10.0)
+- Bug Fix for FP8 pedantic level 2
+- Support Python3.12, Python3.13.
 
 
 # Table of Contents
