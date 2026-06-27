@@ -1,4 +1,4 @@
-# Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+# Copyright (c) 2024-present, FriendliAI Corp. All rights reserved.
 
 """Script to attach copyright header."""
 
@@ -20,10 +20,10 @@ def format_copyright_header(
     # get copyright header configuration
     current_year = datetime.now().year
     header = (
-        f"# Copyright (c) {current_year}-present, FriendliAI Inc. All rights reserved."
+        f"# Copyright (c) {current_year}-present, FriendliAI Corp. All rights reserved."
     )
     header_pattern = (
-        r"# Copyright \(c\) \b\d{4}\b-present, FriendliAI Inc. All rights reserved."
+        r"# Copyright \(c\) \b\d{4}\b-present, FriendliAI Corp. All rights reserved."
     )
 
     file_exts = ["**/*.py", "**/*.pyi"]

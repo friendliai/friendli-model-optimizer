@@ -1,4 +1,4 @@
-# Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+# Copyright (c) 2024-present, FriendliAI Corp. All rights reserved.
 
 """FMO Version utils."""
 
