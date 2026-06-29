@@ -1,5 +1,5 @@
 <!---
-Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+Copyright (c) 2024-present, FriendliAI Corp. All rights reserved.
 -->
 
 <h2><p align="center">Friendli Model Optimizer (FMO) for supercharging generative AI serving 🚀</p></h2>

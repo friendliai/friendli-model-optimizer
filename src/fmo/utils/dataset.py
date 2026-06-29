@@ -1,7 +1,8 @@
-# Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+# Copyright (c) 2024-present, FriendliAI Corp. All rights reserved.
 # pylint: disable=no-value-for-parameter,no-name-in-module,too-many-positional-arguments,too-many-arguments
 
 """FMO-CLI Dataset Utils."""
+
 from __future__ import annotations
 
 import os

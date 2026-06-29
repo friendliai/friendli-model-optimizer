@@ -1,4 +1,4 @@
-# Copyright (c) 2024-present, FriendliAI Inc. All rights reserved.
+# Copyright (c) 2024-present, FriendliAI Corp. All rights reserved.
 # pylint: disable=line-too-long, too-many-arguments, no-name-in-module, too-many-positional-arguments
 """Frienli-Model-Optimizer (FMO) CLI."""
 
